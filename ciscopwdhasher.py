@@ -37,11 +37,12 @@ def banner():
 
 def show_menu():
     print('Select a hashing algorithm:' + '\n')
-    print('[1]  Type 5 (MD5)')
-    print('[2]  Type 7 (XOR Cipher)')
-    print('[3]  Type 8 (PBKDF2-HMAC-SHA256)')
-    print('[4]  Type 9 (Scrypt)')        
-    print('[5]  Exit')
+    print('[1]  Type 5  (MD5)')
+    print('[2]  Type 7  (XOR Cipher)')
+    print('[3]  Type 8  (PBKDF2-HMAC-SHA256)')
+    print('[4]  Type 9  (Scrypt)')    
+    print('[5]  Type 10 (PBKDF2-HMAC-SHA512)')       
+    print('[6]  Exit')
     
 def app_start(): 
     show_menu()
@@ -62,6 +63,8 @@ def app_start():
         elif choice == 4:
             type9()
         elif choice == 5:
+            type10()
+        elif choice == 6:
             sys.exit()
         else:
             print ('\n' + 'Invalid option. Please enter 1-5 or press CTRL + C to exit: ' + '\n')
@@ -155,6 +158,28 @@ def type9():
                     hash = base64.b64encode(hash).decode().translate(b64table)[:-1]
                     # Print the hash in the Cisco IOS CLI format
                     print( '\n' + f"Your Cisco Type 9 password hash is: $9${salt}${hash}")
+                    valid_pwd = True
+                    
+def type10():
+    valid_pwd = False
+    while not valid_pwd:
+        try:
+            pwd = pwd_input()
+        except KeyboardInterrupt:
+                sys.exit(0)
+        else:
+                if (pwd_check(pwd)):
+                    # Create random salt (Cisco use 14 characters from custom B64 table)
+                    salt_chars=[]
+                    for _ in range(16):
+                        salt_chars.append(random.choice(cisco_b64chars))
+                    salt = "".join(salt_chars)
+                    # Create the hash
+                    hash = pbkdf2_hmac("sha512", pwd.encode(), salt.encode(), 100000, 64)
+                    # Convert the hash from Standard Base64 to Cisco Base64
+                    hash = base64.b64encode(hash).decode().translate(b64table)[:-2]
+                    # Print the hash in the Cisco IOS CLI format
+                    print( '\n' + f"Your Cisco Type 10 password hash is: $6${salt}${hash}")
                     valid_pwd = True
 
 def main():
